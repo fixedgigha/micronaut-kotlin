@@ -1,0 +1,36 @@
+version: "3.6"
+# Define services
+services:
+  # App backend service
+  micronaut:
+    # Configuration for building the docker image for the backend service
+    build: .
+    image: micronaut-kotlin:latest
+    ports:
+      - "8080:8080" # Forward the exposed port 8080 on the container to port 8080 on the host machine
+    restart: always
+    links:
+      - "db:db" # This service depends on mysql. Start that first.
+    environment: # Pass environment variables to the service
+      JDBC_URL: jdbc:mysql://db:3306/polls?useSSL=false&serverTimezone=UTC&useLegacyDatetimeCode=false
+      JDBC_USER: callicoder
+      JDBC_PASSWORD: callicoder
+      JDBC_DRIVER: com.mysql.cj.jdbc.Driver
+
+  # Database Service (Mysql)
+  db:
+    image: mysql/mysql-server:8.0
+    ports:
+      - "3306:3306"
+    restart: always
+    environment:
+      MYSQL_DATABASE: polls
+      MYSQL_USER: callicoder
+      MYSQL_PASSWORD: callicoder
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+      - db-data:/var/lib/mysql
+
+# Volumes
+volumes:
+  db-data:
